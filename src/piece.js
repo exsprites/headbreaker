@@ -372,7 +372,7 @@ const {itself, orthogonalTransform} = require('./prelude');
   push(dx, dy, quiet = false, pushedPieces = [this]) {
     this.translate(dx, dy, quiet);
 
-    const stationaries = this.presentConnections.filter(it => pushedPieces.indexOf(it) === -1);
+    const stationaries = this.presentConnections.filter(it => !it.metadata.fixed && pushedPieces.indexOf(it) === -1);
     pushedPieces.push(...stationaries);
     stationaries.forEach(it => it.push(dx, dy, false, pushedPieces));
   }
@@ -408,7 +408,8 @@ const {itself, orthogonalTransform} = require('./prelude');
    * @returns {boolean}
    */
   vericallyOpenMovement(dy) {
-    return connector.vertical.openMovement(this, dy);
+    return this.metadata.permanentVerticallyConnected === true
+      ? false : connector.vertical.openMovement(this, dy);
   }
 
   /**
@@ -417,7 +418,8 @@ const {itself, orthogonalTransform} = require('./prelude');
    * @returns {boolean}
    */
   horizontallyOpenMovement(dx) {
-    return connector.horizontal.openMovement(this, dx);
+    return this.metadata.permanentHorizontallyConnected === true
+      ? false : connector.horizontal.openMovement(this, dx)
   }
 
   /**
