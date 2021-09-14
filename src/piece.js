@@ -409,7 +409,10 @@ const {itself, orthogonalTransform} = require('./prelude');
    */
   vericallyOpenMovement(dy) {
     return this.metadata.permanentVerticallyConnected === true
-      ? false : connector.vertical.openMovement(this, dy);
+      ? false
+      : (this.metadata.openMovement
+        ? true 
+        : connector.vertical.openMovement(this, dy));
   }
 
   /**
@@ -419,7 +422,10 @@ const {itself, orthogonalTransform} = require('./prelude');
    */
   horizontallyOpenMovement(dx) {
     return this.metadata.permanentHorizontallyConnected === true
-      ? false : connector.horizontal.openMovement(this, dx)
+      ? false
+      : (this.metadata.openMovement
+        ? true
+        : connector.horizontal.openMovement(this, dx))
   }
 
   /**
