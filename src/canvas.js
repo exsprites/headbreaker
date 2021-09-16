@@ -13,7 +13,7 @@ const {Horizontal, Vertical} = require('./axis');
 const Shuffler = require('./shuffler');
 const {diameter} = require('./size');
 const {itself} = require('./prelude');
-const {Classic} = require('./outline');
+const {Default} = require('./outline');
 
 /**
  * @typedef {object} Shape
@@ -141,7 +141,7 @@ class Canvas {
     this._puzzleDiameter = Vector.cast(puzzleDiameter);
     /** @type {(image: import('./image-metadata').ImageMetadata) => import('./image-metadata').ImageMetadata} */
     this._imageAdjuster = itself;
-    this._outline = outline || Classic;
+    this._outline = outline || Default;
   }
 
   _initialize() {

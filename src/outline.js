@@ -186,8 +186,96 @@ class Rounded {
   }
 }
 
+class Classic {
+  constructor({
+    insertDepth = 1.2,
+    borderLength = 0.38,
+    referenceInsertAxis = null} = {}) {
+    this.insertDepth = insertDepth;
+    this.borderLength = borderLength;
+    /** @type {import('./axis').Axis} */
+    this.referenceInsertAxis = referenceInsertAxis;
+  }
+
+  /**
+   * @param {import('./vector').Vector} fullSize
+   * @return {number}
+   */
+  referenceInsertAxisLength(fullSize) {
+    return this.referenceInsertAxis ? this.referenceInsertAxis.atVector(fullSize) : Vector.inner.min(fullSize);
+  }
+
+  /**
+   * @param {Piece} p
+   * @param {import('./vector').Vector|number} [size]
+   * @param {import('./vector').Vector|number} [borderFill]
+   * @returns {number[]}
+   */
+  draw(p, size = 150, borderFill = 0) {
+    /** full piece size, from edge to edge */
+    const fullSize = Vector.cast(size);
+
+    /** insert external diameter */
+    const r = Math.trunc(this.referenceInsertAxisLength(fullSize) * (1 - 2 * this.borderLength) * 100) / 100;
+
+    /** edge length, from vertex to insert start */
+    const { x:sx, y:sy } = Vector.divide(Vector.minus(fullSize, r), 2);
+
+    /** insert internal radio, from center to insert end */
+    const { x:ox, y:oy } = Vector.multiply(r, this.insertDepth);
+
+    const rsy  = r + sy;
+    const rsx  = r + sx;
+    const r2sy = r + 2 * sy;
+    const r2sx = r + 2 * sx;
+
+    const sox = 1.3 * ox
+    const soy = 1.3 * oy
+    const ssx = 0.5 * sx
+    const ssy = 0.5 * sy
+
+
+    return [
+      /** start: */  0, 0,
+      /** edge:  */  0, 0,    0, sy,    0, sy,
+      ...sl(p, // insert left
+      /** tab     */ [-sox, ssy,         -sox, rsy + ssy],
+      /** slot    */ [ sox, ssy,          sox, rsy + ssy],
+      /** none    */ [   0, sy ,            0, rsy])
+      /**         */                                                                            ,         0               , rsy           ,
+      /** edge:   */ 0               , rsy             ,         0              , r2sy          ,         0               , r2sy          ,
+      /** edge:   */ 0               , r2sy            ,         sx             , r2sy          ,         sx              , r2sy          ,
+      ...sd(p, // insert down
+      /** tab     */ [ssx, r2sy + soy,     rsx + ssx, r2sy + soy],
+      /** slot    */ [ssx, r2sy - soy,     rsx + ssx, r2sy - soy],
+      /** none    */ [sx            , r2sy            ,         rsx           , r2sy   ])
+      /**         */                                                                          ,         rsx             , r2sy          ,
+      /** edge:   */ rsx             , r2sy            ,         r2sx          , r2sy         ,         r2sx            , r2sy          ,
+      /** edge:   */ r2sx            , r2sy            ,         r2sx          , rsy          ,         r2sx            , rsy            ,
+      ...sr(p, // insert right
+      /** insert: */ [r2sx + sox , rsy + ssy   ,         r2sx + sox, ssy],
+      /**         */ [r2sx - sox , rsy + ssy   ,         r2sx - sox, ssy],
+      /**         */ [r2sx           , rsy             ,         r2sx          , sy])
+      /**         */                                                                          ,         r2sx            , sy    ,
+      /** edge:   */ r2sx            , sy             ,         r2sx          , 0            ,         r2sx            , 0      ,
+      /** edge:   */ r2sx            , 0               ,         rsx           , 0            ,         rsx             , 0      ,
+      ...su(p, // insert up
+      /** insert: */ [rsx + ssx           , -soy            ,         ssx           , -soy],
+      /**         */ [rsx + ssx          , soy             ,         ssx           , soy],
+      /**         */ [rsx            , 0               ,         sx           , 0])
+      /**         */                                                                          ,         sx             , 0      ,
+      /** edge:   */ sx             , 0               ,         0             , 0            ,         0               , 0
+    ]
+  }
+
+  isBezier() {
+    return true;
+  }
+}
+
 module.exports = {
-  Classic: new Squared(),
+  Default: new Squared(),
   Squared,
-  Rounded
+  Rounded,
+  Classic
 }
