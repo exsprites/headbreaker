@@ -69,15 +69,19 @@ class Manufacturer {
     const puzzle = new Puzzle(this.structure);
     const positioner = new Positioner(puzzle, this.headAnchor);
 
-    let verticalSequence = this._newSequence();
-    let horizontalSequence;
+    let verticalSequences = new Array(this.width)
+    for (let x = 0; x < this.width; x++) {
+      verticalSequences[x] = this._newSequence()
+    }
 
     for (let y = 0; y < this.height; y++) {
-      horizontalSequence = this._newSequence();
-      verticalSequence.next();
+      const horizontalSequence = this._newSequence();
 
       for (let x = 0; x < this.width; x++) {
         horizontalSequence.next();
+        const verticalSequence = verticalSequences[x]
+        verticalSequence.next();
+
         const piece = this._buildPiece(puzzle, horizontalSequence, verticalSequence);
         piece.centerAround(positioner.naturalAnchor(x, y));
       }
