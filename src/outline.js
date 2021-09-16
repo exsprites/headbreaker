@@ -190,9 +190,15 @@ class Classic {
   constructor({
     insertDepth = 1.2,
     borderLength = 0.38,
+    edgeOffset = 0.4,
+    insertStretch = 1.3,
+    insertExpanse = 0.5,
     referenceInsertAxis = null} = {}) {
     this.insertDepth = insertDepth;
     this.borderLength = borderLength;
+    this.edgeOffset = edgeOffset
+    this.insertStretch = insertStretch
+    this.insertExpanse = insertExpanse
     /** @type {import('./axis').Axis} */
     this.referenceInsertAxis = referenceInsertAxis;
   }
@@ -229,42 +235,39 @@ class Classic {
     const r2sy = r + 2 * sy;
     const r2sx = r + 2 * sx;
 
-    const sox = 1.3 * ox
-    const soy = 1.3 * oy
-    const ssx = 0.5 * sx
-    const ssy = 0.5 * sy
-
+    const sox = this.insertStretch * ox
+    const soy = this.insertStretch * oy
+    const ssx = this.insertExpanse * sx
+    const ssy = this.insertExpanse * sy
+    const esx = this.edgeOffset * sx
+    const esy = this.edgeOffset * sy
 
     return [
       /** start: */  0, 0,
-      /** edge:  */  0, 0,    0, sy,    0, sy,
+      /** edge:  */  0, 0,    
       ...sl(p, // insert left
-      /** tab     */ [-sox, ssy,         -sox, rsy + ssy],
-      /** slot    */ [ sox, ssy,          sox, rsy + ssy],
-      /** none    */ [   0, sy ,            0, rsy])
-      /**         */                                                                            ,         0               , rsy           ,
-      /** edge:   */ 0               , rsy             ,         0              , r2sy          ,         0               , r2sy          ,
-      /** edge:   */ 0               , r2sy            ,         sx             , r2sy          ,         sx              , r2sy          ,
+      /** tab     */ [ esx, sy,    0, sy,    -sox, ssy,       -sox, rsy + ssy,    0, rsy,     esx, rsy],
+      /** slot    */ [-esx, sy,    0, sy,     sox, ssy,        sox, rsy + ssy,    0, rsy,    -esx, rsy],
+      /** none    */ [   0, sy,    0, sy,       0, sy ,          0, rsy      ,    0, rsy,       0, rsy]),
+      /** edge:   */ 0, r2sy,      0, r2sy,
+      /** start:  */ 0, r2sy,         
       ...sd(p, // insert down
-      /** tab     */ [ssx, r2sy + soy,     rsx + ssx, r2sy + soy],
-      /** slot    */ [ssx, r2sy - soy,     rsx + ssx, r2sy - soy],
-      /** none    */ [sx            , r2sy            ,         rsx           , r2sy   ])
-      /**         */                                                                          ,         rsx             , r2sy          ,
-      /** edge:   */ rsx             , r2sy            ,         r2sx          , r2sy         ,         r2sx            , r2sy          ,
-      /** edge:   */ r2sx            , r2sy            ,         r2sx          , rsy          ,         r2sx            , rsy            ,
+      /** tab     */ [sx, r2sy - esy,     sx, r2sy,       ssx, r2sy + soy,      rsx + ssx, r2sy + soy,         rsx, r2sy,     rsx, r2sy - esy],
+      /** slot    */ [sx, r2sy + esy,     sx, r2sy,       ssx, r2sy - soy,      rsx + ssx, r2sy - soy,         rsx, r2sy,     rsx, r2sy + esy],
+      /** none    */ [sx, r2sy,           sx, r2sy,       sx, r2sy,             rsx, r2sy            ,         rsx, r2sy,     rsx, r2sy]),
+      /** edge:   */ r2sx, r2sy,        r2sx, r2sy,
+      /** start:  */ r2sx, r2sy,
       ...sr(p, // insert right
-      /** insert: */ [r2sx + sox , rsy + ssy   ,         r2sx + sox, ssy],
-      /**         */ [r2sx - sox , rsy + ssy   ,         r2sx - sox, ssy],
-      /**         */ [r2sx           , rsy             ,         r2sx          , sy])
-      /**         */                                                                          ,         r2sx            , sy    ,
-      /** edge:   */ r2sx            , sy             ,         r2sx          , 0            ,         r2sx            , 0      ,
-      /** edge:   */ r2sx            , 0               ,         rsx           , 0            ,         rsx             , 0      ,
+      /** tab   : */ [r2sx - esx, rsy,      r2sx, rsy,       r2sx + sox , rsy + ssy,         r2sx + sox, ssy,        r2sx, sy,     r2sx - esx, sy],
+      /** slot    */ [r2sx + esx, rsy,      r2sx, rsy,       r2sx - sox , rsy + ssy,         r2sx - sox, ssy,        r2sx, sy,     r2sx + esx, sy],
+      /** none    */ [r2sx, rsy,            r2sx, rsy,       r2sx       , rsy      ,         r2sx      , sy,         r2sx, sy,     r2sx, sy]),
+      /** edge:   */ r2sx, 0,   r2sx, 0,
+      /** start:  */ r2sx, 0,
       ...su(p, // insert up
-      /** insert: */ [rsx + ssx           , -soy            ,         ssx           , -soy],
-      /**         */ [rsx + ssx          , soy             ,         ssx           , soy],
-      /**         */ [rsx            , 0               ,         sx           , 0])
-      /**         */                                                                          ,         sx             , 0      ,
-      /** edge:   */ sx             , 0               ,         0             , 0            ,         0               , 0
+      /** tab   : */ [rsx,  esy,    rsx, 0,     rsx + ssx, -soy,         ssx, -soy,         sx, 0,      sx,  esy],
+      /** slot    */ [rsx, -esy,    rsx, 0,     rsx + ssx,  soy,         ssx,  soy,         sx, 0,      sx, -esy],
+      /** none    */ [rsx, 0,       rsx, 0,     rsx,          0,         sx, 0    ,         sx, 0,      sx, 0]),
+      /** edge:   */ 0, 0,          0, 0
     ]
   }
 
